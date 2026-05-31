@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>README Generator</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-primary:#ffffff;--bg-secondary:#f5f5f5;--bg-tertiary:#ebebeb;
+  --bg-info:#e6f1fb;--bg-success:#eaf3de;--bg-warning:#faeeda;--bg-danger:#fcebeb;
+  --text-primary:#1a1a1a;--text-secondary:#666;--text-tertiary:#999;
+  --text-info:#185fa5;--text-success:#3b6d11;--text-warning:#854f0b;--text-danger:#a32d2d;
+  --border-t:rgba(0,0,0,0.12);--border-s:rgba(0,0,0,0.22);--border-p:rgba(0,0,0,0.35);
+  --border-info:rgba(24,95,165,0.35);--border-success:rgba(59,109,17,0.35);
+  --border-warning:rgba(133,79,11,0.35);--border-danger:rgba(163,45,45,0.35);
+  --radius-md:8px;--radius-lg:12px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg-primary:#1e1e1e;--bg-secondary:#2a2a2a;--bg-tertiary:#242424;
+    --bg-info:#0c2340;--bg-success:#172d08;--bg-warning:#2a1a04;--bg-danger:#2a0d0d;
+    --text-primary:#e8e8e8;--text-secondary:#aaa;--text-tertiary:#666;
+    --text-info:#85b7eb;--text-success:#97c459;--text-warning:#ef9f27;--text-danger:#f09595;
+    --border-t:rgba(255,255,255,0.1);--border-s:rgba(255,255,255,0.18);--border-p:rgba(255,255,255,0.3);
+  }
+}
+body{font-family:'Sora',sans-serif;background:var(--bg-tertiary);color:var(--text-primary);min-height:100vh;padding:0}
+.app{max-width:900px;margin:0 auto;padding:1.5rem 1rem 3rem}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:36px;height:36px;background:var(--bg-primary);border:0.5px solid var(--border-s);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:18px}
+.brand h1{font-size:17px;font-weight:500}
+.brand p{font-size:12px;color:var(--text-secondary)}
+.tabs{display:flex;gap:3px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:3px;width:fit-content;margin-bottom:1rem;flex-wrap:wrap}
+.tab{font-family:'Sora',sans-serif;font-size:12px;font-weight:500;padding:5px 13px;border-radius:6px;border:none;cursor:pointer;transition:all .15s;background:transparent;color:var(--text-secondary);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.tab.active{background:var(--bg-primary);color:var(--text-primary);border:0.5px solid var(--border-t)}
+.card{background:var(--bg-primary);border:0.5px solid var(--border-t);border-radius:var(--radius-lg);padding:1.1rem 1.25rem;margin-bottom:.85rem}
+.sec-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text-tertiary);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:9px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:9px}
+.row1{margin-bottom:9px}
+.field{display:flex;flex-direction:column;gap:3px}
+.field label{font-size:11px;color:var(--text-secondary);font-weight:500}
+.field input,.field select,.field textarea{font-family:'Sora',sans-serif;font-size:13px;background:var(--bg-secondary);border:0.5px solid var(--border-t);border-radius:var(--radius-md);padding:6px 9px;color:var(--text-primary);transition:border-color .15s;outline:none;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--border-p)}
+.tpl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:4px}
+.tpl-card{background:var(--bg-secondary);border:0.5px solid var(--border-t);border-radius:var(--radius-md);padding:.7rem .9rem;cursor:pointer;transition:all .15s;text-align:left;width:100%}
+.tpl-card:hover,.tpl-card.on{border-color:var(--border-info);background:var(--bg-info)}
+.tpl-card:hover .tpl-name,.tpl-card.on .tpl-name{color:var(--text-info)}
+.tpl-name{font-size:12px;font-weight:500;color:var(--text-primary)}
+.tpl-desc{font-size:10px;color:var(--text-tertiary);margin-top:2px}
+.section-drag{display:flex;flex-direction:column;gap:4px}
+.drag-item{display:flex;align-items:center;gap:8px;background:var(--bg-secondary);border:0.5px solid var(--border-t);border-radius:var(--radius-md);padding:5px 8px;cursor:grab;user-select:none;font-size:12px}
+.drag-item.dragging{opacity:.4}
+.drag-item.drop-target{border-color:var(--border-info);background:var(--bg-info)}
+.drag-handle{color:var(--text-tertiary);font-size:14px;cursor:grab}
+.tag-wrap{display:flex;flex-wrap:wrap;gap:4px;background:var(--bg-secondary);border:0.5px solid var(--border-t);border-radius:var(--radius-md);padding:4px 7px;min-height:34px;align-items:center;cursor:text}
+.tag-wrap:focus-within{border-color:var(--border-p)}
+.tag{font-size:11px;font-weight:500;padding:2px 7px;background:var(--bg-info);color:var(--text-info);border-radius:20px;display:flex;align-items:center;gap:3px}
+.tag button{background:none;border:none;cursor:pointer;color:inherit;opacity:.7;font-size:11px;padding:0;line-height:1}
+.tag-input{font-family:'Sora',sans-serif;font-size:12px;border:none;background:none;outline:none;color:var(--text-primary);flex:1;min-width:70px}
+.gen-btn{font-family:'Sora',sans-serif;font-size:13px;font-weight:500;padding:9px 22px;background:var(--text-primary);color:var(--bg-primary);border:none;border-radius:var(--radius-md);cursor:pointer;transition:opacity .15s;display:flex;align-items:center;gap:7px}
+.gen-btn:hover{opacity:.85}
+.gen-btn:disabled{opacity:.4;cursor:not-allowed}
+.icon-btn{font-family:'Sora',sans-serif;font-size:12px;font-weight:500;padding:5px 11px;background:transparent;border:0.5px solid var(--border-s);border-radius:var(--radius-md);color:var(--text-secondary);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px}
+.icon-btn:hover{background:var(--bg-secondary);color:var(--text-primary)}
+.icon-btn.danger:hover{background:var(--bg-danger);color:var(--text-danger);border-color:var(--border-danger)}
+.output-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.monospace{background:var(--bg-secondary);border:0.5px solid var(--border-t);border-radius:var(--radius-md);padding:.85rem;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.75;color:var(--text-primary);white-space:pre-wrap;min-height:300px;max-height:500px;overflow-y:auto}
+.preview-area{background:var(--bg-secondary);border:0.5px solid var(--border-t);border-radius:var(--radius-md);padding:.9rem 1.1rem;min-height:300px;max-height:500px;overflow-y:auto;font-size:13px;line-height:1.7}
+.preview-area h1{font-size:19px;font-weight:500;margin:0 0 6px}
+.preview-area h2{font-size:15px;font-weight:500;margin:14px 0 5px;border-bottom:0.5px solid var(--border-t);padding-bottom:3px}
+.preview-area h3{font-size:13px;font-weight:500;margin:10px 0 3px}
+.preview-area p{margin:0 0 7px}
+.preview-area ul,.preview-area ol{padding-left:1.1rem;margin:0 0 7px}
+.preview-area li{margin-bottom:1px}
+.preview-area code{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--bg-tertiary);border:0.5px solid var(--border-t);border-radius:4px;padding:0 4px}
+.preview-area pre{background:var(--bg-tertiary);border:0.5px solid var(--border-t);border-radius:var(--radius-md);padding:8px 10px;overflow-x:auto;margin:6px 0}
+.preview-area pre code{background:none;border:none;padding:0}
+.preview-area blockquote{border-left:2px solid var(--border-s);padding-left:10px;color:var(--text-secondary);margin:6px 0;border-radius:0}
+.preview-area a{color:var(--text-info);text-decoration:none}
+.preview-area table{width:100%;border-collapse:collapse;margin:6px 0;font-size:11.5px}
+.preview-area th,.preview-area td{border:0.5px solid var(--border-t);padding:4px 9px;text-align:left}
+.preview-area th{background:var(--bg-tertiary);font-weight:500}
+.preview-area img{max-width:120px;border-radius:4px;vertical-align:middle}
+.split-pane{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.split-pane textarea{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--bg-secondary);border:0.5px solid var(--border-t);border-radius:var(--radius-md);padding:.85rem;color:var(--text-primary);resize:none;outline:none;min-height:420px;max-height:540px;overflow-y:auto;line-height:1.7;width:100%}
+.split-pane textarea:focus{border-color:var(--border-p)}
+.hist-item{background:var(--bg-primary);border:0.5px solid var(--border-t);border-radius:var(--radius-md);padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .12s;margin-bottom:6px}
+.hist-item:hover{background:var(--bg-secondary)}
+.hist-meta{font-size:11px;color:var(--text-tertiary);margin-top:2px}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px}
+.badge.success{background:var(--bg-success);color:var(--text-success)}
+.badge.info{background:var(--bg-info);color:var(--text-info)}
+.badge.warn{background:var(--bg-warning);color:var(--text-warning)}
+.empty-state{text-align:center;padding:2.5rem 1rem;color:var(--text-tertiary);font-size:12px}
+.empty-state i{font-size:28px;display:block;margin-bottom:8px;opacity:.35}
+.detect-box{background:var(--bg-secondary);border:0.5px dashed var(--border-s);border-radius:var(--radius-md);padding:.9rem;transition:border-color .15s}
+.detect-box:focus-within{border-color:var(--border-p)}
+.detect-box textarea{font-family:'JetBrains Mono',monospace;font-size:11px;background:transparent;border:none;width:100%;outline:none;color:var(--text-primary);resize:vertical;line-height:1.65}
+.badge-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.badge-chip{display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--border-s);background:var(--bg-primary);cursor:pointer;transition:all .12s;color:var(--text-secondary);font-family:'Sora',sans-serif}
+.badge-chip.on{background:var(--bg-success);color:var(--text-success);border-color:var(--border-success);font-weight:500}
+.spinner{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.blink::after{content:'▋';animation:bl .8s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+.progress-bar-wrap{height:3px;background:var(--bg-secondary);border-radius:2px;margin:6px 0;overflow:hidden}
+.progress-bar{height:100%;background:var(--text-info);border-radius:2px;transition:width .3s;width:0}
+@media(max-width:600px){.row2,.row3{grid-template-columns:1fr}.split-pane{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon"><i class="ti ti-brand-github"></i></div>
+    <div>
+      <h1>README Generator</h1>
+      <p>Auto-detect · Badge builder · History · Live edit</p>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px">
+    <button class="icon-btn" onclick="switchMain('history')"><i class="ti ti-history" style="font-size:13px"></i> History <span id="histCount" class="badge info" style="display:none"></span></button>
+  </div>
+</div>
+
+<div class="tabs" id="mainTabs">
+  <button class="tab active" data-t="configure" onclick="switchMain('configure')"><i class="ti ti-settings" style="font-size:12px"></i> Configure</button>
+  <button class="tab" data-t="detect" onclick="switchMain('detect')"><i class="ti ti-scan" style="font-size:12px"></i> Auto-detect</button>
+  <button class="tab" data-t="badges" onclick="switchMain('badges')"><i class="ti ti-shield" style="font-size:12px"></i> Badges</button>
+  <button class="tab" data-t="output" onclick="switchMain('output')"><i class="ti ti-file-text" style="font-size:12px"></i> Output</button>
+  <button class="tab" data-t="edit" onclick="switchMain('edit')"><i class="ti ti-layout-columns" style="font-size:12px"></i> Split edit</button>
+  <button class="tab" data-t="history" onclick="switchMain('history')"><i class="ti ti-history" style="font-size:12px"></i> History</button>
+</div>
+
+<!-- CONFIGURE -->
+<div id="pane-configure">
+  <div class="card">
+    <div class="sec-label"><i class="ti ti-info-circle" style="font-size:13px"></i> Project basics</div>
+    <div class="row2">
+      <div class="field"><label>Project name *</label><input id="f-name" type="text" placeholder="my-awesome-project"/></div>
+      <div class="field"><label>Tagline</label><input id="f-tag" type="text" placeholder="A blazing-fast API for…"/></div>
+    </div>
+    <div class="row1"><div class="field"><label>Description</label><textarea id="f-desc" rows="2" placeholder="What does it do? Who is it for?"></textarea></div></div>
+    <div class="row3">
+      <div class="field"><label>Type</label><select id="f-type"><option value="">Select…</option><option>CLI tool</option><option>Web application</option><option>REST API</option><option>Library / SDK</option><option>Mobile app</option><option>Data science / ML</option><option>Browser extension</option><option>Desktop app</option><option>DevOps / Infrastructure</option><option>Game</option></select></div>
+      <div class="field"><label>Language</label><select id="f-lang"><option value="">Select…</option><option>Python</option><option>JavaScript</option><option>TypeScript</option><option>Go</option><option>Rust</option><option>Java</option><option>C#</option><option>C++</option><option>Ruby</option><option>PHP</option><option>Swift</option><option>Kotlin</option></select></div>
+      <div class="field"><label>License</label><select id="f-lic"><option value="">None</option><option>MIT</option><option>Apache 2.0</option><option>GPL-3.0</option><option>BSD-3-Clause</option><option>ISC</option><option>AGPL-3.0</option><option>Unlicense</option></select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label"><i class="ti ti-stack" style="font-size:13px"></i> Tech stack</div>
+    <div class="tag-wrap" id="techWrap" onclick="document.getElementById('techIn').focus()">
+      <input id="techIn" class="tag-input" placeholder="Type framework/lib and press Enter…" onkeydown="tagKey(event)"/>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label"><i class="ti ti-layout-grid" style="font-size:13px"></i> Template</div>
+    <div class="tpl-grid" id="tplGrid"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label"><i class="ti ti-drag-drop" style="font-size:13px"></i> Sections — drag to reorder, toggle on/off</div>
+    <div class="section-drag" id="sectionDrag"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label"><i class="ti ti-terminal" style="font-size:13px"></i> Commands &amp; tone</div>
+    <div class="row2">
+      <div class="field"><label>Install command</label><input id="f-install" type="text" placeholder="npm install my-pkg"/></div>
+      <div class="field"><label>Run / usage command</label><input id="f-usage" type="text" placeholder="npm run dev"/></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>GitHub repo URL</label><input id="f-repo" type="text" placeholder="https://github.com/user/repo"/></div>
+      <div class="field"><label>Tone</label><select id="f-tone"><option value="professional">Professional</option><option value="friendly">Friendly &amp; approachable</option><option value="minimal">Minimal / no-nonsense</option><option value="detailed">Detailed &amp; thorough</option></select></div>
+    </div>
+    <div class="row1"><div class="field"><label>Extra notes for AI</label><textarea id="f-notes" rows="2" placeholder="Anything else the README should mention…"></textarea></div></div>
+  </div>
+
+  <div style="display:flex;justify-content:flex-end;">
+    <button class="gen-btn" id="genBtn" onclick="generate()"><i class="ti ti-sparkles"></i> Generate README</button>
+  </div>
+</div>
+
+<!-- AUTO-DETECT -->
+<div id="pane-detect" style="display:none">
+  <div class="card">
+    <div class="sec-label"><i class="ti ti-scan" style="font-size:13px"></i> Paste code or config file</div>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">Paste your <code style="font-family:monospace;font-size:11px">package.json</code>, <code style="font-family:monospace;font-size:11px">pyproject.toml</code>, <code style="font-family:monospace;font-size:11px">Cargo.toml</code>, <code style="font-family:monospace;font-size:11px">go.mod</code>, or any source file. AI will extract project info automatically.</p>
+    <div class="detect-box">
+      <textarea id="detectInput" rows="10" placeholder="Paste package.json, pyproject.toml, Cargo.toml, go.mod, main.py, index.ts, or any source file…"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+      <button class="icon-btn" onclick="clearDetect()"><i class="ti ti-trash" style="font-size:13px"></i> Clear</button>
+      <button class="gen-btn" id="detectBtn" onclick="autoDetect()"><i class="ti ti-scan" style="font-size:12px"></i> Extract &amp; fill form</button>
+    </div>
+    <div id="detectStatus" style="display:none;margin-top:8px;font-size:12px;color:var(--text-success)"></div>
+  </div>
+  <div class="card" id="detectPreviewCard" style="display:none">
+    <div class="sec-label">Detected info</div>
+    <div id="detectPreview" style="font-size:12px;line-height:1.8"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px">
+      <button class="gen-btn" onclick="switchMain('configure');generate()"><i class="ti ti-sparkles" style="font-size:12px"></i> Generate README now</button>
+    </div>
+  </div>
+</div>
+
+<!-- BADGES -->
+<div id="pane-badges" style="display:none">
+  <div class="card">
+    <div class="sec-label"><i class="ti ti-shield" style="font-size:13px"></i> Badge builder</div>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Selected badges are automatically injected at the top of your generated README.</p>
+    <div id="badgeSections"></div>
+  </div>
+  <div class="card">
+    <div class="sec-label">Preview</div>
+    <div id="badgePreview" class="preview-area" style="min-height:80px;max-height:120px"></div>
+    <div style="margin-top:8px">
+      <div class="sec-label" style="margin-bottom:4px">Markdown</div>
+      <div class="monospace" id="badgeMd" style="min-height:50px;max-height:80px;font-size:10.5px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- OUTPUT -->
+<div id="pane-output" style="display:none">
+  <div class="output-bar">
+    <div style="display:flex;align-items:center;gap:7px">
+      <span style="font-size:13px;font-weight:500">Markdown output</span>
+      <span class="badge success" id="doneBadge" style="display:none"><i class="ti ti-check" style="font-size:10px"></i> Done</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="icon-btn" onclick="copyMd()"><i class="ti ti-copy" style="font-size:12px"></i> Copy</button>
+      <button class="icon-btn" onclick="downloadMd()"><i class="ti ti-download" style="font-size:12px"></i> Download .md</button>
+      <button class="icon-btn" onclick="switchMain('edit')"><i class="ti ti-layout-columns" style="font-size:12px"></i> Edit</button>
+      <button class="icon-btn" onclick="saveToHistory()"><i class="ti ti-bookmark" style="font-size:12px"></i> Save</button>
+    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="monospace" id="outputBox"><div class="empty-state"><i class="ti ti-file-text"></i>Fill the form and click Generate README.</div></div>
+  <div style="margin-top:10px">
+    <div class="output-bar"><span style="font-size:12px;font-weight:500;color:var(--text-secondary)">Preview</span></div>
+    <div class="preview-area" id="previewBox"><div class="empty-state"><i class="ti ti-eye"></i>Preview appears here after generation.</div></div>
+  </div>
+</div>
+
+<!-- SPLIT EDIT -->
+<div id="pane-edit" style="display:none">
+  <div class="output-bar">
+    <span style="font-size:13px;font-weight:500">Live editor</span>
+    <div style="display:flex;gap:6px">
+      <button class="icon-btn" onclick="copyMd()"><i class="ti ti-copy" style="font-size:12px"></i> Copy</button>
+      <button class="icon-btn" onclick="downloadMd()"><i class="ti ti-download" style="font-size:12px"></i> Download</button>
+    </div>
+  </div>
+  <div class="split-pane">
+    <div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:.05em">Markdown</div>
+      <textarea id="editMd" placeholder="Generate a README first, or type Markdown here…" oninput="syncPreview()"></textarea>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:.05em">Preview</div>
+      <div class="preview-area" id="editPreview" style="min-height:420px;max-height:540px"><div class="empty-state"><i class="ti ti-eye"></i>Type on the left to see preview.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="pane-history" style="display:none">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="sec-label" style="margin-bottom:0"><i class="ti ti-history" style="font-size:13px"></i> Saved READMEs</div>
+      <button class="icon-btn danger" onclick="clearHistory()"><i class="ti ti-trash" style="font-size:12px"></i> Clear all</button>
+    </div>
+    <div id="histList"><div class="empty-state"><i class="ti ti-archive"></i>No saved READMEs yet. Generate one and click Save.</div></div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+/* ─── Data ─── */
+const SECTIONS_ALL=[
+  {id:'badges',label:'Badges',icon:'ti-shield'},
+  {id:'toc',label:'Table of contents',icon:'ti-list'},
+  {id:'demo',label:'Demo / screenshot',icon:'ti-photo'},
+  {id:'features',label:'Features',icon:'ti-star'},
+  {id:'installation',label:'Installation',icon:'ti-download'},
+  {id:'usage',label:'Usage',icon:'ti-terminal'},
+  {id:'configuration',label:'Configuration',icon:'ti-settings'},
+  {id:'api',label:'API reference',icon:'ti-code'},
+  {id:'architecture',label:'Architecture',icon:'ti-sitemap'},
+  {id:'contributing',label:'Contributing',icon:'ti-users'},
+  {id:'testing',label:'Testing',icon:'ti-test-pipe'},
+  {id:'deployment',label:'Deployment',icon:'ti-rocket'},
+  {id:'faq',label:'FAQ',icon:'ti-question-mark'},
+  {id:'roadmap',label:'Roadmap',icon:'ti-map'},
+  {id:'changelog',label:'Changelog',icon:'ti-clock'},
+  {id:'license',label:'License',icon:'ti-license'},
+  {id:'acknowledgements',label:'Acknowledgements',icon:'ti-heart'},
+];
+
+const TEMPLATES={
+  standard:{name:'Standard',desc:'Most common structure',sections:['features','installation','usage','contributing','license']},
+  minimal:{name:'Minimal',desc:'Just the essentials',sections:['installation','usage','license']},
+  detailed:{name:'Detailed',desc:'Full documentation',sections:['toc','demo','features','installation','usage','configuration','api','architecture','contributing','testing','deployment','faq','roadmap','changelog','license','acknowledgements']},
+  awesome:{name:'Awesome',desc:'Badges + rich content',sections:['badges','toc','features','installation','usage','contributing','license']},
+  library:{name:'Library / SDK',desc:'Package-oriented',sections:['badges','features','installation','usage','api','configuration','contributing','changelog','license']},
+};
+
+const BADGE_CATS=[
+  {label:'CI / CD',items:[
+    {id:'github-actions',label:'GitHub Actions',url:(r)=>`https://img.shields.io/github/actions/workflow/status/${rp(r)}/ci.yml?label=CI&style=flat-square`},
+    {id:'circleci',label:'CircleCI',url:(r)=>`https://img.shields.io/circleci/build/github/${rp(r)}?style=flat-square`},
+    {id:'travis',label:'Travis CI',url:(r)=>`https://img.shields.io/travis/com/${rp(r)}?style=flat-square`},
+  ]},
+  {label:'Package',items:[
+    {id:'npm-v',label:'npm version',url:(r,n)=>`https://img.shields.io/npm/v/${n||'my-package'}?style=flat-square`},
+    {id:'npm-dl',label:'npm downloads',url:(r,n)=>`https://img.shields.io/npm/dm/${n||'my-package'}?style=flat-square`},
+    {id:'pypi',label:'PyPI',url:(r,n)=>`https://img.shields.io/pypi/v/${n||'my-package'}?style=flat-square`},
+    {id:'crates',label:'Crates.io',url:(r,n)=>`https://img.shields.io/crates/v/${n||'my-crate'}?style=flat-square`},
+  ]},
+  {label:'Code quality',items:[
+    {id:'coverage',label:'Coverage',url:(r)=>`https://img.shields.io/codecov/c/github/${rp(r)}?style=flat-square`},
+    {id:'codeclimate',label:'Maintainability',url:(r)=>`https://img.shields.io/codeclimate/maintainability/${rp(r)}?style=flat-square`},
+  ]},
+  {label:'Repo info',items:[
+    {id:'stars',label:'Stars',url:(r)=>`https://img.shields.io/github/stars/${rp(r)}?style=flat-square`},
+    {id:'forks',label:'Forks',url:(r)=>`https://img.shields.io/github/forks/${rp(r)}?style=flat-square`},
+    {id:'issues',label:'Open issues',url:(r)=>`https://img.shields.io/github/issues/${rp(r)}?style=flat-square`},
+    {id:'license-badge',label:'License',url:(r)=>`https://img.shields.io/github/license/${rp(r)}?style=flat-square`},
+    {id:'last-commit',label:'Last commit',url:(r)=>`https://img.shields.io/github/last-commit/${rp(r)}?style=flat-square`},
+  ]},
+];
+
+/* ─── State ─── */
+let techTags=[];
+let selectedSections=new Set(['features','installation','usage','contributing','license']);
+let selectedTemplate='standard';
+let selectedBadges=new Set();
+let generatedMd='';
+let history=[];
+let streaming=false;
+let dragSrc=null;
+
+/* ─── Helpers ─── */
+function rp(r){const m=(r||'').match(/github\.com\/([^/]+\/[^/]+)/);return m?m[1]:'owner/repo'}
+
+/* ─── Templates ─── */
+function initTemplates(){
+  const g=document.getElementById('tplGrid');
+  Object.entries(TEMPLATES).forEach(([k,v])=>{
+    const d=document.createElement('button');
+    d.className='tpl-card'+(k===selectedTemplate?' on':'');
+    d.dataset.k=k;
+    d.innerHTML=`<div class="tpl-name">${v.name}</div><div class="tpl-desc">${v.desc}</div>`;
+    d.onclick=()=>{
+      selectedTemplate=k;
+      selectedSections=new Set(v.sections);
+      document.querySelectorAll('.tpl-card').forEach(c=>c.classList.toggle('on',c.dataset.k===k));
+      renderDragSections();
+    };
+    g.appendChild(d);
+  });
+}
+
+/* ─── Drag sections ─── */
+function renderDragSections(){
+  const container=document.getElementById('sectionDrag');
+  container.innerHTML='';
+  const order=SECTIONS_ALL.filter(s=>selectedSections.has(s.id));
+  const rest=SECTIONS_ALL.filter(s=>!selectedSections.has(s.id));
+  [...order,...rest].forEach(s=>{
+    const isOn=selectedSections.has(s.id);
+    const div=document.createElement('div');
+    div.className='drag-item';div.draggable=true;div.dataset.id=s.id;
+    div.style.opacity=isOn?'1':'0.5';
+    div.innerHTML=`<i class="ti ti-grip-vertical drag-handle"></i><i class="ti ${s.icon}" style="font-size:13px;color:var(--text-secondary)"></i><span style="flex:1;font-size:12px">${s.label}</span><button style="font-family:Sora,sans-serif;font-size:10px;padding:2px 8px;border-radius:20px;border:0.5px solid var(--border-s);background:${isOn?'var(--bg-info)':'transparent'};color:${isOn?'var(--text-info)':'var(--text-secondary)'};cursor:pointer" onclick="toggleSection('${s.id}',this)">${isOn?'On':'Off'}</button>`;
+    div.addEventListener('dragstart',e=>{dragSrc=s.id;div.classList.add('dragging');e.dataTransfer.effectAllowed='move'});
+    div.addEventListener('dragend',()=>div.classList.remove('dragging'));
+    div.addEventListener('dragover',e=>{e.preventDefault();div.classList.add('drop-target')});
+    div.addEventListener('dragleave',()=>div.classList.remove('drop-target'));
+    div.addEventListener('drop',e=>{
+      e.preventDefault();div.classList.remove('drop-target');
+      if(!dragSrc||dragSrc===s.id)return;
+      const items=Array.from(container.children);
+      const fromIdx=items.findIndex(el=>el.dataset.id===dragSrc);
+      const toIdx=items.findIndex(el=>el.dataset.id===s.id);
+      if(fromIdx<0||toIdx<0)return;
+      const srcEl=items[fromIdx];
+      if(fromIdx<toIdx)container.insertBefore(srcEl,div.nextSibling);
+      else container.insertBefore(srcEl,div);
+    });
+    container.appendChild(div);
+  });
+}
+
+function toggleSection(id,btn){
+  if(selectedSections.has(id)){
+    selectedSections.delete(id);
+    btn.textContent='Off';btn.style.background='transparent';btn.style.color='var(--text-secondary)';
+    btn.parentElement.style.opacity='0.5';
+  }else{
+    selectedSections.add(id);
+    btn.textContent='On';btn.style.background='var(--bg-info)';btn.style.color='var(--text-info)';
+    btn.parentElement.style.opacity='1';
+  }
+}
+
+/* ─── Badges ─── */
+function initBadges(){
+  const wrap=document.getElementById('badgeSections');
+  BADGE_CATS.forEach(cat=>{
+    const label=document.createElement('div');
+    label.className='sec-label';label.style.marginTop='8px';label.textContent=cat.label;
+    wrap.appendChild(label);
+    const row=document.createElement('div');row.className='badge-row';
+    cat.items.forEach(b=>{
+      const chip=document.createElement('button');
+      chip.className='badge-chip';chip.dataset.id=b.id;
+      chip.innerHTML=`<i class="ti ti-shield" style="font-size:11px"></i>${b.label}`;
+      chip.onclick=()=>{
+        if(selectedBadges.has(b.id))selectedBadges.delete(b.id);
+        else selectedBadges.add(b.id);
+        chip.classList.toggle('on',selectedBadges.has(b.id));
+        updateBadgePreview();
+      };
+      row.appendChild(chip);
+    });
+    wrap.appendChild(row);
+  });
+}
+
+function updateBadgePreview(){
+  const repo=document.getElementById('f-repo').value;
+  const name=document.getElementById('f-name').value||'my-project';
+  const lines=[];
+  BADGE_CATS.forEach(cat=>cat.items.forEach(b=>{
+    if(selectedBadges.has(b.id))lines.push(`![${b.label}](${b.url(repo,name)})`);
+  }));
+  const md=lines.join(' ');
+  document.getElementById('badgeMd').textContent=md||'(no badges selected)';
+  if(window.marked)
+    document.getElementById('badgePreview').innerHTML=md?marked.parse(md):'<p style="color:var(--text-tertiary);font-size:12px">Select badges above to preview them.</p>';
+}
+
+/* ─── Tags ─── */
+function tagKey(e){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const v=e.target.value.trim().replace(/,$/,'');
+    if(!v)return;
+    techTags.push(v);e.target.value='';renderTags();
+  }else if(e.key==='Backspace'&&e.target.value===''&&techTags.length){
+    techTags.pop();renderTags();
+  }
+}
+function removeTag(i){techTags.splice(i,1);renderTags()}
+function renderTags(){
+  const wrap=document.getElementById('techWrap');const inp=document.getElementById('techIn');
+  wrap.querySelectorAll('.tag').forEach(el=>el.remove());
+  techTags.forEach((t,i)=>{
+    const el=document.createElement('div');el.className='tag';
+    el.innerHTML=`${t}<button onclick="removeTag(${i})" aria-label="Remove ${t}">×</button>`;
+    wrap.insertBefore(el,inp);
+  });
+}
+
+/* ─── Section order ─── */
+function getOrderedSections(){
+  const container=document.getElementById('sectionDrag');
+  if(!container)return Array.from(selectedSections);
+  return Array.from(container.children)
+    .filter(el=>selectedSections.has(el.dataset.id))
+    .map(el=>el.dataset.id);
+}
+
+/* ─── Prompt builder ─── */
+function buildPrompt(){
+  const name=document.getElementById('f-name').value.trim();
+  const tag=document.getElementById('f-tag').value.trim();
+  const desc=document.getElementById('f-desc').value.trim();
+  const type=document.getElementById('f-type').value;
+  const lang=document.getElementById('f-lang').value;
+  const lic=document.getElementById('f-lic').value;
+  const install=document.getElementById('f-install').value.trim();
+  const usage=document.getElementById('f-usage').value.trim();
+  const repo=document.getElementById('f-repo').value.trim();
+  const tone=document.getElementById('f-tone').value;
+  const notes=document.getElementById('f-notes').value.trim();
+  const secs=getOrderedSections().map(id=>SECTIONS_ALL.find(s=>s.id===id)?.label).filter(Boolean);
+  const badgesArr=[];
+  BADGE_CATS.forEach(cat=>cat.items.forEach(b=>{
+    if(selectedBadges.has(b.id))badgesArr.push(`![${b.label}](${b.url(repo,name)})`);
+  }));
+  return `Generate a professional README.md. Output ONLY raw Markdown, nothing else.
+
+Project: ${name}
+${tag?'Tagline: '+tag:''}
+${desc?'Description: '+desc:''}
+${type?'Type: '+type:''}
+${lang?'Language: '+lang:''}
+${techTags.length?'Stack: '+techTags.join(', '):''}
+${install?'Install: '+install:''}
+${usage?'Run: '+usage:''}
+${repo?'Repo: '+repo:''}
+${lic?'License: '+lic:''}
+Tone: ${tone}
+Sections (in this order): ${secs.join(', ')}
+${badgesArr.length?'Add these badges near the top:\n'+badgesArr.join(' '):''}
+${notes?'Extra: '+notes:''}
+
+Make it polished, GitHub-ready, with code blocks using language hints. Use shields.io badge syntax where needed.`;
+}
+
+/* ─── Generate ─── */
+async function generate(){
+  if(streaming)return;
+  const name=document.getElementById('f-name').value.trim();
+  if(!name){
+    const el=document.getElementById('f-name');
+    el.style.borderColor='#e24b4a';
+    setTimeout(()=>el.style.borderColor='',1600);
+    return;
+  }
+  streaming=true;generatedMd='';
+  const btn=document.getElementById('genBtn');
+  btn.disabled=true;btn.innerHTML='<div class="spinner"></div> Generating…';
+  document.getElementById('doneBadge').style.display='none';
+  switchMain('output');
+  const box=document.getElementById('outputBox');
+  box.textContent='';box.classList.add('blink');
+  const bar=document.getElementById('progressBar');bar.style.width='5%';
+  let prog=5;
+  const pi=setInterval(()=>{if(prog<85){prog+=Math.random()*2;bar.style.width=prog+'%'}},400);
+
+  /* NOTE: Replace 'YOUR_API_KEY' below with your actual Anthropic API key,
+     OR set up a proxy server and change the URL accordingly.
+     Never commit a real API key to a public repository. */
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':'YOUR_API_KEY',           // <-- replace with your key
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        stream:true,
+        messages:[{role:'user',content:buildPrompt()}]
+      })
+    });
+    const reader=res.body.getReader();const dec=new TextDecoder();let buf='';
+    while(true){
+      const{done,value}=await reader.read();if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop();
+      for(const line of lines){
+        if(line.startsWith('data: ')){
+          const d=line.slice(6).trim();if(d==='[DONE]')continue;
+          try{const e=JSON.parse(d);if(e.delta?.text){generatedMd+=e.delta.text;box.textContent=generatedMd;box.scrollTop=box.scrollHeight}}catch{}
+        }
+      }
+    }
+  }catch(e){box.textContent='Error: '+e.message+'\n\nMake sure you have set a valid API key.'}
+  finally{
+    clearInterval(pi);bar.style.width='100%';
+    box.classList.remove('blink');
+    streaming=false;btn.disabled=false;
+    btn.innerHTML='<i class="ti ti-sparkles"></i> Regenerate';
+    document.getElementById('doneBadge').style.display='inline-flex';
+    setTimeout(()=>{bar.style.width='0'},800);
+    if(generatedMd&&window.marked){
+      document.getElementById('previewBox').innerHTML=marked.parse(generatedMd);
+      document.getElementById('editMd').value=generatedMd;
+      syncPreview();
+    }
+    autoSaveHistory();
+  }
+}
+
+/* ─── Auto-detect ─── */
+async function autoDetect(){
+  const code=document.getElementById('detectInput').value.trim();
+  if(!code)return;
+  const btn=document.getElementById('detectBtn');
+  btn.disabled=true;btn.innerHTML='<div class="spinner"></div> Detecting…';
+  const status=document.getElementById('detectStatus');
+  status.style.display='block';status.textContent='Analyzing…';status.style.color='var(--text-secondary)';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':'YOUR_API_KEY',           // <-- replace with your key
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:600,
+        messages:[{role:'user',content:`Extract project info from this file and respond ONLY with JSON (no markdown, no backticks):\n{"name":"","tagline":"","description":"","type":"","language":"","stack":[],"installCmd":"","usageCmd":"","license":""}\n\nFile:\n${code.slice(0,3000)}`}]
+      })
+    });
+    const d=await res.json();
+    const text=d.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const info=JSON.parse(text);
+    if(info.name)document.getElementById('f-name').value=info.name;
+    if(info.tagline)document.getElementById('f-tag').value=info.tagline;
+    if(info.description)document.getElementById('f-desc').value=info.description;
+    if(info.type){const s=document.getElementById('f-type');[...s.options].forEach(o=>{if(o.value.toLowerCase().includes(info.type.toLowerCase()))s.value=o.value})}
+    if(info.language){const s=document.getElementById('f-lang');[...s.options].forEach(o=>{if(o.value.toLowerCase().includes(info.language.toLowerCase()))s.value=o.value})}
+    if(info.license){const s=document.getElementById('f-lic');[...s.options].forEach(o=>{if(o.value.toLowerCase().includes(info.license.toLowerCase()))s.value=o.value})}
+    if(info.installCmd)document.getElementById('f-install').value=info.installCmd;
+    if(info.usageCmd)document.getElementById('f-usage').value=info.usageCmd;
+    if(info.stack?.length){techTags=[...new Set([...techTags,...info.stack])];renderTags()}
+    status.style.color='var(--text-success)';status.textContent='Extracted successfully!';
+    const prev=document.getElementById('detectPreview');
+    prev.innerHTML=Object.entries(info).filter(([,v])=>v&&(Array.isArray(v)?v.length:true))
+      .map(([k,v])=>`<div><span style="color:var(--text-secondary);font-weight:500">${k}:</span> ${Array.isArray(v)?v.join(', '):v}</div>`).join('');
+    document.getElementById('detectPreviewCard').style.display='';
+  }catch(e){
+    status.style.color='var(--text-danger)';status.textContent='Could not parse: '+e.message;
+  }finally{
+    btn.disabled=false;btn.innerHTML='<i class="ti ti-scan" style="font-size:12px"></i> Extract &amp; fill form';
+  }
+}
+
+function clearDetect(){
+  document.getElementById('detectInput').value='';
+  document.getElementById('detectStatus').style.display='none';
+  document.getElementById('detectPreviewCard').style.display='none';
+}
+
+/* ─── Split edit ─── */
+function syncPreview(){
+  const md=document.getElementById('editMd').value;
+  generatedMd=md;
+  if(window.marked)
+    document.getElementById('editPreview').innerHTML=md?marked.parse(md):'<div class="empty-state"><i class="ti ti-eye"></i>Type Markdown on the left.</div>';
+  document.getElementById('outputBox').textContent=md;
+}
+
+/* ─── History ─── */
+function autoSaveHistory(){
+  if(!generatedMd)return;
+  const name=document.getElementById('f-name').value.trim()||'Untitled';
+  history.unshift({name,md:generatedMd,ts:new Date().toLocaleString(),auto:true});
+  if(history.length>8)history=history.slice(0,8);
+  renderHistory();updateHistCount();
+}
+
+function saveToHistory(){
+  if(!generatedMd){alert('Generate a README first.');return}
+  const name=document.getElementById('f-name').value.trim()||'Untitled';
+  history.unshift({name,md:generatedMd,ts:new Date().toLocaleString(),auto:false});
+  if(history.length>8)history=history.slice(0,8);
+  renderHistory();updateHistCount();
+  const btns=document.querySelectorAll('[onclick="saveToHistory()"]');
+  btns.forEach(b=>{const o=b.innerHTML;b.innerHTML='<i class="ti ti-check" style="font-size:12px"></i> Saved!';setTimeout(()=>{b.innerHTML=o},1500)});
+}
+
+function renderHistory(){
+  const el=document.getElementById('histList');
+  if(!history.length){
+    el.innerHTML='<div class="empty-state"><i class="ti ti-archive"></i>No saved READMEs yet. Generate one and click Save.</div>';
+    return;
+  }
+  el.innerHTML='';
+  history.forEach((h,i)=>{
+    const div=document.createElement('div');div.className='hist-item';
+    div.innerHTML=`<div><div style="font-size:13px;font-weight:500">${h.name}</div><div class="hist-meta">${h.ts} ${h.auto?'<span class="badge warn">auto</span>':'<span class="badge success">saved</span>'}</div></div><div style="display:flex;gap:5px"><button class="icon-btn" onclick="loadHistory(${i})"><i class="ti ti-arrow-back-up" style="font-size:12px"></i> Restore</button><button class="icon-btn danger" onclick="deleteHistory(${i})"><i class="ti ti-trash" style="font-size:12px"></i></button></div>`;
+    el.appendChild(div);
+  });
+}
+
+function loadHistory(i){
+  generatedMd=history[i].md;
+  document.getElementById('outputBox').textContent=generatedMd;
+  document.getElementById('editMd').value=generatedMd;
+  if(window.marked){
+    document.getElementById('previewBox').innerHTML=marked.parse(generatedMd);
+    syncPreview();
+  }
+  switchMain('output');
+}
+
+function deleteHistory(i){history.splice(i,1);renderHistory();updateHistCount()}
+function clearHistory(){if(confirm('Clear all history?')){history=[];renderHistory();updateHistCount()}}
+function updateHistCount(){
+  const el=document.getElementById('histCount');
+  if(history.length){el.textContent=history.length;el.style.display='inline-flex'}
+  else el.style.display='none';
+}
+
+/* ─── Copy / Download ─── */
+function copyMd(){
+  if(!generatedMd)return;
+  navigator.clipboard.writeText(generatedMd).then(()=>{
+    document.querySelectorAll('[onclick="copyMd()"]').forEach(b=>{
+      const o=b.innerHTML;b.innerHTML='<i class="ti ti-check" style="font-size:12px"></i> Copied!';
+      setTimeout(()=>{b.innerHTML=o},1500);
+    });
+  });
+}
+
+function downloadMd(){
+  if(!generatedMd)return;
+  const name=document.getElementById('f-name').value.trim()||'README';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([generatedMd],{type:'text/markdown'}));
+  a.download='README.md';a.click();
+}
+
+/* ─── Tab switching ─── */
+function switchMain(name){
+  ['configure','detect','badges','output','edit','history'].forEach(t=>{
+    document.getElementById('pane-'+t).style.display=t===name?'':'none';
+    document.querySelectorAll('.tab[data-t]').forEach(b=>b.classList.toggle('active',b.dataset.t===name));
+  });
+  if(name==='badges')updateBadgePreview();
+}
+
+/* ─── Init ─── */
+initTemplates();
+renderDragSections();
+initBadges();
+renderHistory();
+</script>
+</body>
+</html>
